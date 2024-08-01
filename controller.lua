@@ -102,7 +102,9 @@ end
 function getSettings()
     if (not (settings.get("configured") == true)) then
         print("Autostart this programm? (y/n)")
-        config.autoStart = handleInput(GetBool)
+        if (handleInput(GetBool)) then
+            shell.execute("cp", "/CC-Tweaked-CBC-Controller/startup.lua", "/")
+        end
 
         print("Please enter canon mount position in the following format: 'x y z' ")
         config.mountPos = handleInput(GetMountPos)
@@ -190,7 +192,7 @@ function listen()
         print(("Message received from %f blocks away. Reply to %d. "):format(replyChannel, distance))
         if (message.message.hash == nil or message.message.type ~= "aim_at") then
             printError("INVALID MESSAGE")
-            ::continue::
+            goto continue
         end
 
         local hash = message.message.hash
@@ -201,7 +203,7 @@ function listen()
         HashFactory.finish()
         if (hash ~= HashFactory.asHex()) then
             printError("INVALID MESSAGE. HASH MISMATCH")
-            ::continue::
+            goto continue
         end
         local newPos = vector.new(message.message.x, message.message.y, message.message.z)
         cannon.AimAt(newPos)
@@ -209,6 +211,7 @@ function listen()
             ["type"] = "status_report",
             ["status"] = "OK"
         })
+        ::continue::
     end
 end
 function setAutolisten(words)
@@ -222,9 +225,7 @@ function setAutolisten(words)
     end
 end
 
-if (config.autoStart) then
-    shell.execute("cp", "/CC-Tweaked-CBC-Controller/startup.lua", "/")
-end
+
 
 getSettings()
 cannon = Cannon.new(peripheral.wrap(config.VerticalGearshiftId), peripheral.wrap(config.HorizontalGearshiftId),
