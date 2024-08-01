@@ -4,7 +4,7 @@ local Cannon = require("libs.Cannon")
 local SHA256 = require("libs.hash.sha2_256")
 local stream = require("libs.hash.util.stream")
 -- globals
-SECRET = "abobus"
+SECRET = "SECRET"
 facings = {
     ["NORTH"] = 1,
     ["SOUTH"] = 1,
@@ -27,7 +27,6 @@ function handleInput(func, args)
     end
     return data
 end
-
 function GetMountPos()
     local posString = read()
 
@@ -102,6 +101,9 @@ function saveConfig()
 end
 function getSettings()
     if (not (settings.get("configured") == true)) then
+        print("Autostart this programm? (y/n)")
+        config.autoStart = handleInput(GetBool)
+
         print("Please enter canon mount position in the following format: 'x y z' ")
         config.mountPos = handleInput(GetMountPos)
 
@@ -135,13 +137,6 @@ function getSettings()
     else
         config = settings.get("cannonConfig")
     end
-end
-function init()
-    getSettings()
-    cannon = Cannon.new(peripheral.wrap(config.VerticalGearshiftId), peripheral.wrap(config.HorizontalGearshiftId),
-        peripheral.wrap(config.VerticalSpeedControllerId), peripheral.wrap(config.HorizontalSpeedControllerId),
-        vector.new(config.mountPos[1], config.mountPos[2], config.mountPos[3]), config.barrelLength, config.InputSpeed,
-        config.GunRotationRatio, config.facing)
 end
 
 -- commands
@@ -210,7 +205,10 @@ function listen()
         end
         local newPos = vector.new(message.message.x, message.message.y, message.message.z)
         cannon.AimAt(newPos)
-        rednet.send(replyChannel, {["type"] = "status_report", ["status"] = "OK"})
+        rednet.send(replyChannel, {
+            ["type"] = "status_report",
+            ["status"] = "OK"
+        })
     end
 end
 function setAutolisten(words)
@@ -223,7 +221,18 @@ function setAutolisten(words)
         saveConfig()
     end
 end
-init()
+
+if (config.autoStart) then
+    local content = 'shell.execute("cd", "CC-Tweaked-CBC-Controller"); shell.execute("controller")'
+    io.open("startup.lua", "w"):write(content)
+end
+
+getSettings()
+cannon = Cannon.new(peripheral.wrap(config.VerticalGearshiftId), peripheral.wrap(config.HorizontalGearshiftId),
+    peripheral.wrap(config.VerticalSpeedControllerId), peripheral.wrap(config.HorizontalSpeedControllerId),
+    vector.new(config.mountPos[1], config.mountPos[2], config.mountPos[3]), config.barrelLength, config.InputSpeed,
+    config.GunRotationRatio, config.facing)
+
 if (config.useAutolisten) then
     listen()
 end

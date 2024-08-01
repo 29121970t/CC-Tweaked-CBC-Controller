@@ -11,7 +11,7 @@ end
 local commands = {
     ["test"] = function() print("Hey! It works!") end,
     ["clear"] = function() term.clear() term.setCursorPos(1,1) end,
-    ["help"] = function() print("Commands: " .. table.concat(lib.get_keys(mod.commands), ", ")) end
+    ["help"] = function() print("Commands: " .. table.concat(lib.get_keys(mod.commands), ", ")) end,
 }
 mod.commands = commands
 

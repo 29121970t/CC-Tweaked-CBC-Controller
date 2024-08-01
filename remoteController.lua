@@ -5,7 +5,7 @@ local cli = require("libs.cli")
 
 local A = SHA256()
 
-local SECRET = "abobus"
+local SECRET = "SECRET"
 
 
 local modem = peripheral.find("modem") or error("No modem attached")
