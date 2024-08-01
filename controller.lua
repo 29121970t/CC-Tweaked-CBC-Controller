@@ -28,9 +28,7 @@ lib.clearConsole()
 settings.load()
 config = {}
 cannon = {}
-presets = {
-    ["gun4"] = gun4
-}
+
 remoteActions = {}
 -- input handling
 function handleInput(func, args)
@@ -122,6 +120,7 @@ function gun4()
     local x, y, z = gps.locate()
     local pos = vector.new(x, y, z)
     if (x == nil or not (lib.isint(x) and lib.isint(y) and lib.isint(z))) then
+        printError("Gps error")
         print("Please enter PC position in the following format: 'x y z' ")
         local xd = handleInput(GetMountPos)
         pos = vector.new(xd[1], xd[2], xd[3])
@@ -133,7 +132,9 @@ function gun4()
     conf.useAutolisten = true
     return conf
 end
-
+presets = {
+    ["gun4"] = gun4
+}
 -- setting up env vars
 function saveConfig()
     settings.set("cannonConfig", config)
@@ -151,10 +152,10 @@ function getSettings()
         print("Use preset? (y/n)")
         if (handleInput(GetBool)) then
             local presetsString = ""
-            for i in pairs(lib.get_keys(presets)) do
-                presetsString = presetsString .. i .. ", "
+            for i, k in pairs(lib.get_keys(presets)) do
+                presetsString = presetsString .. k .. ", "
             end
-            print("The following presets are available: " .. presetsString .. "n")
+            print("The following presets are available: " .. presetsString)
             config = handleInput(GetPreset)()
 
         else
