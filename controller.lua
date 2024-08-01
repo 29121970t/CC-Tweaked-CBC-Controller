@@ -151,7 +151,7 @@ function getSettings()
         print("Use preset? (y/n)")
         if (handleInput(GetBool)) then
             local presetsString = ""
-            for i in lib.get_keys(presets) do
+            for i in pairs(lib.get_keys(presets)) do
                 presetsString = presetsString .. i .. ", "
             end
             print("The following presets are available: " .. presetsString .. "n")
