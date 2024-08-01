@@ -104,7 +104,10 @@ function getSettings()
         print("Autostart this programm? (y/n)")
         if (handleInput(GetBool) and not fs.exists("/startup.lua")) then
             shell.execute("cp", "/CC-Tweaked-CBC-Controller/startup.lua", "/")
+        elseif fs.exists("/startup.lua") then
+            shell.execute("rm", "/startup.lua")
         end
+            
 
         print("Please enter canon mount position in the following format: 'x y z' ")
         config.mountPos = handleInput(GetMountPos)
@@ -175,6 +178,30 @@ function aimAt(words)
     cannon.AimAt(newPos)
 end
 
+function setRotationSpeed(words)
+    local num = tonumber(words[2])
+    if (num == nil) then
+        printError("Got not a number")
+        return nil
+    end
+    cannon.InputSpeed = num
+    config.InputSpeed = num
+    saveConfig()
+end
+
+
+function AimAtAction(message, replyChannel)
+    local newPos = vector.new(message.message.x, message.message.y, message.message.z)
+    cannon.AimAt(newPos)
+    rednet.send(replyChannel, {
+        ["type"] = "status_report",
+        ["status"] = "OK"
+    })
+end
+remoteActions = {
+    ["aim_at"] = AimAtAction
+}
+
 function listen()
     print("Listening...")
     local modems = {peripheral.find("modem", function(name, modem)
@@ -190,14 +217,14 @@ function listen()
     while true do
         local event, side, channel, replyChannel, message, distance = os.pullEvent("modem_message")
         print(("Message received from %f blocks away. Reply to %d. "):format(replyChannel, distance))
-        if (message.message.hash == nil or message.message.type ~= "aim_at") then
+        if (message.message.hash == nil) then
             printError("INVALID MESSAGE")
             goto continue
         end
-
+    
         local hash = message.message.hash
         message.message.hash = nil
-
+    
         HashFactory.init()
         HashFactory.update(stream.fromString(lib.dump(message.message) .. SECRET))
         HashFactory.finish()
@@ -205,12 +232,12 @@ function listen()
             printError("INVALID MESSAGE. HASH MISMATCH")
             goto continue
         end
-        local newPos = vector.new(message.message.x, message.message.y, message.message.z)
-        cannon.AimAt(newPos)
-        rednet.send(replyChannel, {
-            ["type"] = "status_report",
-            ["status"] = "OK"
-        })
+
+        if (remoteActions[message.message.type] == nil) then
+            printError("INVALID ACTION TYPE.")
+            goto continue
+        end
+        remoteActions[message.message.type](message, replyChannel)
         ::continue::
     end
 end
@@ -241,4 +268,5 @@ cli.addCommand("setFacing", setFacing)
 cli.addCommand("aimAt", aimAt)
 cli.addCommand("listen", listen)
 cli.addCommand("setAutolisten", setAutolisten)
+cli.addCommand("setRotationSpeed", setRotationSpeed)
 parallel.waitForAll(cli.CLI)

@@ -15,7 +15,7 @@ function handleResponse()
     while true do
         local event, side, channel, replyChannel, message, distance = os.pullEvent("modem_message")
         if (message.message.type == "status_report" and message.message.status == "OK") then
-            print("Ready to fire!")
+            print(replyChannel .. "ready to fire!")
         end
     end
 end
