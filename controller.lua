@@ -223,7 +223,7 @@ function setAutolisten(words)
 end
 
 if (config.autoStart) then
-    shell.execute("cp", "startup.lua", "../")
+    shell.execute("cp", "/CC-Tweaked-CBC-Controller/startup.lua", "/")
 end
 
 getSettings()
