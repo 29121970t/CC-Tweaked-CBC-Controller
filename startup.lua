@@ -1,1 +1,1 @@
-shell.execute("cd", "CC-Tweaked-CBC-Controller"); shell.execute("controller")
+shell.execute("CC-Tweaked-CBC-Controller/controller.lua")
