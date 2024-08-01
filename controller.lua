@@ -102,7 +102,7 @@ end
 function getSettings()
     if (not (settings.get("configured") == true)) then
         print("Autostart this programm? (y/n)")
-        if (handleInput(GetBool)) then
+        if (handleInput(GetBool) and not fs.exists("/startup.lua")) then
             shell.execute("cp", "/CC-Tweaked-CBC-Controller/startup.lua", "/")
         end
 
